@@ -1,0 +1,1086 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Luxury Ecosystem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --gold-bright: #FFD700;
+      --gold-dark: #b89326;
+      --black: #050505;
+      --black-light: #121212;
+      --text: #FFFFFF;
+      --text-dim: #A1A1AA;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-border: rgba(212, 175, 55, 0.15);
+      --glass-bg: rgba(10, 10, 10, 0.6);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* PREVENT ALL PAGE SCROLLING - APP LIKE EXPERIENCE */
+    html, body {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden; /* NO SCROLL AT HTML LEVEL */
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none; /* Prevent bounce padding */
+    }
+
+    /* GLOWING BACKGROUND EFFECT */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 60vh;
+      background: radial-gradient(ellipse at top, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* --- SIDEBAR --- */
+    #sidebar {
+      width: 90px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 0;
+      z-index: 2000;
+      flex-shrink: 0;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    .nav-item {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: all 0.4s var(--ease-out);
+      border-radius: var(--radius-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,175,55,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.4s var(--ease-out);
+    }
+
+    .nav-item:hover::before, .nav-item.active::before { opacity: 1; }
+    .nav-item:hover, .nav-item.active { 
+      color: var(--gold-bright);
+      box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.4), 0 10px 20px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .nav-icon { font-size: 1.5rem; margin-bottom: 6px; z-index: 1; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    .nav-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; z-index: 1; }
+
+    /* --- MAIN CONTENT LAYOUT --- */
+    #main-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      background: radial-gradient(circle at 80% 80%, rgba(20, 18, 15, 1) 0%, var(--black) 100%);
+    }
+
+    .top-bar {
+      height: 90px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 50px;
+      background: linear-gradient(to bottom, rgba(5,5,5,1) 0%, rgba(5,5,5,0) 100%);
+      flex-shrink: 0;
+      z-index: 1000;
+      position: absolute; /* Floating bar */
+      top: 0; left: 0; right: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .logo-img {
+      height: 40px;
+      width: auto;
+      animation: logo-fade-in 0.8s ease-out forwards;
+      opacity: 0;
+    }
+
+    .hero-logo {
+      width: clamp(200px, 60vw, 400px);
+      height: auto;
+      animation: logo-fade-in 1.2s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes logo-reveal {
+      0% {
+        clip-path: inset(0 100% 0 0);
+        opacity: 0;
+      }
+      100% {
+        clip-path: inset(0 0% 0 0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes logo-glow {
+      0% { filter: drop-shadow(0 0 5px var(--gold-bright)) drop-shadow(0 0 15px rgba(212,175,55,0.5)); }
+      100% { filter: drop-shadow(0 0 10px var(--gold-bright)) drop-shadow(0 0 25px rgba(212,175,55,0.8)); }
+    }
+
+    @keyframes logo-fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes logo-slide-in {
+      0% { transform: translateY(-50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    }
+
+    .btn-bundle-toggle {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      padding: 12px 28px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.4s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 25px rgba(212,175,55,0.15);
+    }
+
+    .btn-bundle-toggle:hover {
+      background: var(--gold);
+      color: var(--black);
+      transform: scale(1.05);
+      box-shadow: 0 15px 30px rgba(212,175,55,0.3);
+    }
+    .bundle-badge {
+      background: var(--text);
+      color: var(--black);
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 900;
+    }
+
+    /* --- VIEWS CONTAINER --- */
+    .views-container {
+      flex-grow: 1;
+      height: 100%;
+      position: relative;
+    }
+
+    .view {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto; /* Internal scrolling only */
+      overflow-x: hidden;
+      padding-top: 100px; /* Space for top-bar */
+      padding-bottom: 50px;
+      transform: translateY(20px);
+    }
+    
+    .view::-webkit-scrollbar { width: 6px; }
+    .view::-webkit-scrollbar-track { background: transparent; }
+    .view::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 10px; }
+
+    .view.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      z-index: 100;
+    }
+
+    /* --- HOME VIEW --- */
+      #view-home {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: url(\'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000\') center/cover no-repeat;
+        position: relative;
+        padding: 0;
+        min-height: 100vh;
+      }
+
+    #view-home::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .hero-title {
+      margin-bottom: 0;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      margin: 0 auto 45px;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      color: var(--black);
+      padding: 18px 45px;
+      border-radius: 50px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s var(--ease-out);
+      font-size: 0.95rem;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 10px 30px rgba(212,175,55,0.25);
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(212,175,55,0.4);
+    }
+
+    /* --- EXPLORE VIEW (PINTEREST MASONRY) --- */
+    #view-explore {
+      padding: 100px 50px 50px 50px;
+      background: transparent;
+    }
+
+    .explore-header-box {
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .explore-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--text), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .explore-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    /* Minimalist Search */
+    .search-container {
+      position: relative;
+    }
+
+    .search-bar {
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--surface-border);
+      border-radius: 25px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      transition: all 0.5s var(--ease-out);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-bar:focus {
+      width: 320px;
+      padding: 0 20px 0 50px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      border-color: var(--gold);
+      box-shadow: 0 0 30px rgba(212,175,55,0.15);
+      outline: none;
+      cursor: text;
+    }
+
+    .search-bar::placeholder { color: transparent; transition: color 0.3s; }
+    .search-bar:focus::placeholder { color: var(--text-dim); }
+
+    .search-icon {
+      position: absolute;
+      left: 17px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      pointer-events: none;
+      color: var(--gold-bright);
+    }
+
+    /* Masonry Layout Container (CSS Columns approach) */
+    .masonry-grid {
+      columns: 4 280px;
+      column-gap: 25px;
+      width: 100%;
+    }
+
+    .pin-card {
+      background: var(--black-light);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.5s var(--ease-out);
+      border: 1px solid var(--surface-border);
+      position: relative;
+      break-inside: avoid;
+      margin-bottom: 25px;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .pin-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(212,175,55,0.15);
+      border-color: var(--gold);
+    }
+
+    .pin-img-wrapper {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    /* Variable height simulation for Pinterest feel */
+    .pin-card:nth-child(even) .pin-img-wrapper { aspect-ratio: 3/4; }
+    .pin-card:nth-child(odd) .pin-img-wrapper { aspect-ratio: 4/5; }
+    .pin-card:nth-child(3n) .pin-img-wrapper { aspect-ratio: 1/1; }
+
+    .pin-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s var(--ease-out);
+    }
+    
+    .pin-card:hover .pin-img {
+      transform: scale(1.1) rotate(1deg);
+    }
+
+    .pin-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 25px;
+      opacity: 0.9;
+      transition: opacity 0.4s;
+    }
+
+    .pin-card:hover .pin-overlay {
+      opacity: 1;
+      background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+    }
+
+    .pin-category {
+      color: var(--gold-bright);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: all 0.4s var(--ease-out) 0.1s;
+    }
+
+    .pin-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.1;
+      transform: translateY(10px);
+      transition: all 0.4s var(--ease-out);
+    }
+
+    .pin-card:hover .pin-category, .pin-card:hover .pin-title {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* --- APP VIEW --- */
+    #view-app {
+      padding: 100px 50px 50px;
+      align-items: center;
+    }
+    .video-container {
+      width: 100%; max-width: 1000px;
+      aspect-ratio: 21/9;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+      margin-top: 40px;
+    }
+    .video-container iframe { width: 100%; height: 100%; }
+
+    /* --- ABOUT VIEW --- */
+    #view-about {
+      padding: 100px 50px 50px;
+      max-width: 1000px; margin: 0 auto;
+    }
+    .about-text { font-size: 1.1rem; line-height: 1.8; color: var(--text-dim); }
+    .about-quote {
+      margin: 40px 0; padding: 30px;
+      border-left: 4px solid var(--gold);
+      background: var(--surface);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-style: italic; color: var(--gold-bright); font-size: 1.3rem;
+    }
+
+    /* --- CONTACT VIEW --- */
+    #view-contact {
+      padding: 100px 50px 50px;
+    }
+    .contact-wrapper {
+      display: flex; gap: 60px; max-width: 1200px; margin: 0 auto; width: 100%;
+    }
+    .contact-info { flex: 0 0 350px; }
+    .contact-item { margin-bottom: 30px; }
+    .contact-label { color: var(--gold-bright); font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.85rem; margin-bottom: 8px; }
+    .contact-value { color: var(--text); font-size: 1.05rem; line-height: 1.5; }
+    
+    .contact-form { flex: 1; background: var(--surface); padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--surface-border); }
+    .form-group { margin-bottom: 25px; }
+    .form-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); margin-bottom: 10px; display: block; font-weight: 700; }
+    .form-input, .form-textarea {
+      width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--surface-border);
+      color: var(--text); padding: 16px 20px; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 1rem; transition: all 0.3s;
+    }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--gold-bright); background: rgba(0,0,0,0.8); box-shadow: 0 0 20px rgba(212,175,55,0.1); }
+    .form-textarea { min-height: 180px; resize: none; }
+
+    /* --- BUNDLE BUILDER SIDEBAR --- */
+    #package-builder {
+      position: fixed; top: 0; right: -400px; width: 400px; height: 100%;
+      background: rgba(10,10,10,0.95); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border-left: 1px solid var(--surface-border); z-index: 3000;
+      transition: right 0.5s var(--ease-out); display: flex; flex-direction: column;
+      box-shadow: -20px 0 50px rgba(0,0,0,0.8);
+    }
+    #package-builder.open { right: 0; }
+    
+    .builder-header { padding: 40px 30px 20px; border-bottom: 1px solid var(--surface-border); display: flex; justify-content: space-between; align-items: center; }
+    .builder-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--gold); }
+    .builder-close { cursor: pointer; font-size: 2rem; color: var(--text-dim); transition: color 0.3s; line-height: 1; }
+    .builder-close:hover { color: #ff4757; }
+
+    .bundle-list { flex-grow: 1; overflow-y: auto; padding: 25px; }
+    .bundle-list::-webkit-scrollbar { width: 4px; }
+    .bundle-list::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+    
+    .bundle-item { 
+      background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border);
+      padding: 15px; border-radius: var(--radius-sm); margin-bottom: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: all 0.3s;
+    }
+    .bundle-item:hover { border-color: var(--gold); background: rgba(255,255,255,0.05); }
+    .bundle-item-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .bundle-item-price { color: var(--gold-bright); font-size: 0.85rem; font-weight: 800; }
+    .bundle-item-remove { 
+      color: #ff4757; background: rgba(255, 71, 87, 0.1); width: 30px; height: 30px; 
+      display: flex; align-items: center; justify-content: center; border-radius: 50%; 
+      cursor: pointer; transition: all 0.3s; 
+    }
+    .bundle-item-remove:hover { background: #ff4757; color: white; transform: scale(1.1); }
+
+    .builder-footer { padding: 30px; background: rgba(0,0,0,0.8); border-top: 1px solid var(--surface-border); }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 1.3rem; font-weight: 800; }
+    .btn-minimize {
+      background: transparent; color: var(--text-dim); border: 1px solid var(--text-dim);
+      width: 100%; padding: 12px; border-radius: 50px; cursor: pointer; font-family: inherit;
+      text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.1em; transition: all 0.3s; margin-top: 15px;
+    }
+    .btn-minimize:hover { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--text); }
+
+    /* --- MODAL FOR SERVICES --- */
+    #modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      z-index: 4000; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; visibility: hidden; transition: all 0.5s var(--ease-out);
+    }
+    #modal-backdrop.show { opacity: 1; visibility: visible; }
+
+    .modal-box {
+      background: var(--black-light); width: 100%; max-width: 1000px;
+      border-radius: var(--radius-lg); overflow: hidden; display: flex;
+      border: 1px solid var(--surface-border); box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+      transform: scale(0.95) translateY(20px); transition: all 0.5s var(--ease-out);
+      max-height: 90vh;
+    }
+    #modal-backdrop.show .modal-box { transform: scale(1) translateY(0); }
+
+    .modal-left { width: 45%; position: relative; }
+    .modal-left img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-left::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, transparent, var(--black-light)); }
+    
+    .modal-right { width: 55%; padding: 50px; overflow-y: auto; position: relative; }
+    .modal-right::-webkit-scrollbar { width: 4px; }
+    .modal-right::-webkit-scrollbar-thumb { background: var(--gold); }
+
+    .modal-close-icon {
+      position: absolute; top: 25px; right: 25px;
+      background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: all 0.3s; z-index: 10;
+    }
+    .modal-close-icon:hover { background: var(--text); color: var(--black); }
+
+    .modal-category { color: var(--gold-bright); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.2em; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin: 10px 0 20px; line-height: 1; }
+    .modal-desc { color: var(--text-dim); line-height: 1.7; font-size: 1.05rem; margin-bottom: 30px; }
+
+    .upsell-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--gold); font-weight: 800; margin-bottom: 15px; border-bottom: 1px solid var(--surface-border); padding-bottom: 10px; }
+    .upsell-grid { display: grid; gap: 15px; margin-bottom: 35px; }
+    .upsell-card {
+      background: rgba(255,255,255,0.02); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--surface-border);
+      cursor: pointer; transition: all 0.3s; display: flex; justify-content: space-between; align-items: center;
+    }
+    .upsell-card:hover { background: rgba(212,175,55,0.05); border-color: rgba(212,175,55,0.4); transform: translateY(-2px); }
+    .upsell-card.selected { border-color: var(--gold-bright); background: rgba(212,175,55,0.1); box-shadow: 0 0 20px rgba(212,175,55,0.15); }
+    .upsell-name { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+    .upsell-desc { font-size: 0.8rem; color: var(--text-dim); margin-top: 5px; }
+    .upsell-price { color: var(--gold-bright); font-weight: 800; font-size: 1.1rem; }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 1024px) {
+      .masonry-grid { columns: 3 250px; }
+      .contact-wrapper { flex-direction: column; gap: 40px; }
+      .contact-info { flex: none; display: flex; justify-content: space-between; flex-wrap: wrap; }
+      .top-bar { padding: 0 25px; } /* Fix right cutoff */
+    }
+    @media (max-width: 768px) {
+      #sidebar { width: 70px; }
+      .nav-item { width: 50px; height: 50px; }
+      .nav-icon { font-size: 1.2rem; }
+      .nav-label { font-size: 0.45rem; }
+      #main-content { padding-left: 0; }
+      .masonry-grid { columns: 2 200px; }
+      .hero-title { font-size: 4rem; }
+      .modal-box { flex-direction: column; max-height: 95vh; }
+      .modal-left { width: 100%; height: 250px; }
+      .modal-right { width: 100%; padding: 30px; }
+      .explore-header-box { flex-direction: column; align-items: flex-start; gap: 15px; }
+      #package-builder { width: 320px; right: -320px; }
+      .top-bar { padding: 0 20px; } 
+    }
+    @media (max-width: 480px) {
+      .masonry-grid { columns: 1 100%; }
+      .contact-info { flex-direction: column; }
+      .hero-title { font-size: 3rem; margin-bottom: 0; }
+      .hero-subtitle { font-size: 1rem; margin: 0 auto 20px; padding: 0 10px; }
+      .btn-gold { padding: 15px 30px; font-size: 0.85rem; }
+      .explore-title { font-size: 2.2rem; }
+      .modal-title { font-size: 2rem; }
+      #package-builder { width: 100vw; right: -100vw; }
+
+      #view-home {
+        padding-top: 0 !important; /* Remove padding from .view completely */
+        padding-bottom: 0 !important;
+        height: 100vh; /* Full viewport height */
+        justify-content: center; /* Center vertically */
+        align-items: center; /* Center horizontally */
+        display: flex; /* Make it a flex container */
+        flex-direction: column; /* Stack content vertically */
+        overflow: hidden; /* Ensure no scroll */
+      }
+
+      .hero-content {
+        padding: 20px; /* Adjust padding for smaller screens */
+        width: 100%; /* Ensure it takes full width */
+        max-width: 100%; /* Override max-width for mobile */
+        display: flex; /* Make it a flex container */
+        flex-direction: column; /* Stack content vertically */
+        justify-content: center; /* Center vertically */
+        align-items: center; /* Center horizontally */
+        gap: 20px; /* Space between logo, text, and button */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <!-- SIDEBAR -->
+    <nav id="sidebar">
+      <div class="nav-item active" onclick="showView('home')" data-view="home">
+        <span class="nav-icon">✧</span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" onclick="showView('explore')" data-view="explore">
+        <span class="nav-icon">✦</span>
+        <span class="nav-label">Explore</span>
+      </div>
+      <div class="nav-item" onclick="showView('app')" data-view="app">
+        <span class="nav-icon">📱</span>
+        <span class="nav-label">App</span>
+      </div>
+      <div class="nav-item" onclick="showView('about')" data-view="about">
+        <span class="nav-icon">◆</span>
+        <span class="nav-label">About</span>
+      </div>
+      <div class="nav-item" onclick="showView('contact')" data-view="contact">
+        <span class="nav-icon">✉</span>
+        <span class="nav-label">Contact</span>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content">
+      <div class="top-bar">
+        <div class="logo"><img src="https://i.imgur.com/olqSAoh.png" alt="CaboApp Logo" class="logo-img"></div>
+        <button class="btn-bundle-toggle" onclick="togglePackageBuilder()">
+          <span>Bundle</span>
+          <div class="bundle-badge" id="bundleBadge">0</div>
+        </button>
+      </div>
+
+      <div class="views-container">
+        <!-- HOME VIEW -->
+        <div class="view active" id="view-home">
+          <div class="hero-content">
+           <h1 class="hero-title"><img src="https://i.imgur.com/olqSAoh.png" alt="CaboApp Logo" class="hero-logo"></h1>
+            <p class="hero-subtitle">The world's premier luxury ecosystem. Curated experiences, elite access, and bespoke services at your fingertips.</p>
+            <button class="btn-gold" onclick="showView('explore')">Curate Your Experience</button>
+          </div>
+        </div>
+
+        <!-- EXPLORE VIEW (PINTEREST STYLE) -->
+        <div class="view" id="view-explore">
+          <div class="explore-header-box">
+            <div>
+              <h2 class="explore-title">Explore Luxury</h2>
+              <p class="explore-subtitle">Discover experiences and build your custom package.</p>
+            </div>
+            <div class="search-container">
+              <input type="text" id="searchInput" class="search-bar" placeholder="Search experiences..." onkeyup="filterServices()">
+              <span class="search-icon">🔍</span>
+            </div>
+          </div>
+          
+          <div class="masonry-grid" id="masonryGrid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- APP VIEW -->
+        <div class="view" id="view-app">
+          <div>
+            <h2 class="explore-title">The Digital Key</h2>
+            <p class="explore-subtitle">A revolutionary platform for high-net-worth individuals.</p>
+          </div>
+          <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&mute=1&loop=1&playlist=_NfXIw4gDtA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <!-- ABOUT VIEW -->
+        <div class="view" id="view-about">
+          <div>
+            <h2 class="explore-title">The Philosophy</h2>
+            <p class="explore-subtitle">Redefining the essence of luxury living in Los Cabos.</p>
+          </div>
+          <div class="about-text" style="margin-top: 30px;">
+            <p>This was born from a singular vision: to create the world's most comprehensive luxury lifestyle ecosystem. We believe that true luxury is not just about possessions — it's about experiences, absolute access, and the freedom to live life exactly as you envision it without friction.</p>
+            <div class="about-quote">"We don't just open doors — we build entirely new ones for those who demand nothing less than the extraordinary."</div>
+            <p>From private aviation and elite sports to Michelin-starred dining and VIP nightlife — CaboApp is the single master key that unlocks the city. Our curation process is rigorous, ensuring only the highest standards are met for our discerning clientele.</p>
+          </div>
+        </div>
+
+        <!-- CONTACT VIEW -->
+        <div class="view" id="view-contact">
+          <div>
+            <h2 class="explore-title">Access Concierge</h2>
+            <p class="explore-subtitle">Our dedicated team is at your disposal 24/7.</p>
+          </div>
+          <div class="contact-wrapper" style="margin-top: 40px;">
+            <div class="contact-info">
+              <div class="contact-item">
+                <div class="contact-label">Headquarters</div>
+                <div class="contact-value">Costa Azul Km 29.5<br>23406 San José del Cabo, B.C.S.</div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-label">Direct Line</div>
+                <div class="contact-value">+52 624 121 7058</div>
+              </div>
+              <div class="contact-item">
+                <div class="contact-label">Private Enquiries</div>
+                <div class="contact-value">angelo@caboapp.com</div>
+              </div>
+            </div>
+
+            <!-- WEB3FORMS INTEGRATION -->
+            <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+              <input type="hidden" name="access_key" value="edcb2865-5192-45fa-972c-3ea7af5e838c">
+              <input type="hidden" name="subject" value="New Executive Inquiry - CaboApp">
+              
+              <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label">First Name</label>
+                  <input class="form-input" type="text" name="first_name" placeholder="John" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label">Last Name</label>
+                  <input class="form-input" type="text" name="last_name" placeholder="Doe" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Private Email</label>
+                <input class="form-input" type="email" name="email" placeholder="john@example.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Executive Request</label>
+                <textarea class="form-textarea" name="message" placeholder="Detail your luxury lifestyle needs..." required></textarea>
+              </div>
+              <button type="submit" class="btn-gold" style="width: 100%; border-radius: var(--radius-sm);">Submit Inquiry</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- PACKAGE BUILDER / BUNDLE SIDEBAR -->
+    <aside id="package-builder">
+      <div class="builder-header">
+        <div>
+          <p style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 0.15em;">Active Draft</p>
+          <h2 class="builder-title" style="margin-top: 5px;">Custom Package</h2>
+        </div>
+        <div class="builder-close" onclick="togglePackageBuilder()">×</div>
+      </div>
+      
+      <div class="bundle-list" id="bundleList">
+        <div style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-style: italic;">No experiences added yet.</div>
+      </div>
+      
+      <div class="builder-footer">
+        <div class="total-row">
+          <span style="color: var(--text-dim); font-size: 1rem; text-transform: uppercase;">Est. Valuation</span>
+          <span class="total-amount" id="totalAmount" style="color: var(--gold-bright);">$0</span>
+        </div>
+        <button class="btn-gold" style="width: 100%; margin-bottom: 15px; border-radius: var(--radius-sm);" onclick="reserveBundleEmail()">📧 Reserve via Email</button>
+        <button class="btn-gold" style="width: 100%; background: linear-gradient(135deg, #128C7E, #25D366); color: white; border-radius: var(--radius-sm);" onclick="reserveBundleWhatsApp()">💬 Book via WhatsApp</button>
+        
+        <button class="btn-minimize" onclick="togglePackageBuilder()">Minimize Cart</button>
+      </div>
+    </aside>
+
+    <!-- SERVICE MODAL WITH UPSELLS -->
+    <div id="modal-backdrop" onclick="if(event.target === this) closeModal()">
+      <div class="modal-box">
+        <div class="modal-left">
+          <img id="modalImg" src="" alt="Service">
+        </div>
+        <div class="modal-right">
+          <div class="modal-close-icon" onclick="closeModal()">✕</div>
+          <div class="modal-category" id="modalCategory">Category</div>
+          <h2 class="modal-title" id="modalTitle">Title</h2>
+          <p class="modal-desc" id="modalDesc">Description</p>
+          
+          <h3 class="upsell-title">Enhance Your Experience</h3>
+          <div class="upsell-grid" id="upsellGrid">
+            <!-- Upsells populated via JS -->
+          </div>
+          
+          <button class="btn-gold" style="width: 100%; padding: 20px; font-size: 1rem; border-radius: var(--radius-sm);" onclick="addToBundle()">Append to Bundle</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const services = [
+      { id: 1, category: 'Travel', title: 'Hotels', img: 'https://i.imgur.com/x1wZ9MB.jpeg', desc: 'Exclusive beachfront villas with personal staff, private infinity pools, and breathtaking views of the Sea de Cortez.', upsells: [{id:'u1', name:'Private Executive Chef', price:800, desc:'Gourmet meals prepared exclusively in your villa'}, {id:'u2', name:'24/7 Butler Service', price:500, desc:'Dedicated personal assistance for all needs'}] },
+      { id: 2, category: 'Transport', title: 'Luxury Cars', img: 'https://i.imgur.com/24MojBD.jpeg', desc: 'Access to the world\'s most exotic vehicles for the ultimate driving experience along the coast.', upsells: [{id:'u27', name:'Security Escort', price:600, desc:'Discreet professional security detail'}, {id:'u28', name:'Track Day Access', price:1200, desc:'Private access to racing circuit'}] },
+      { id: 3, category: 'Marketing', title: 'Media & Strategy', img: 'https://i.imgur.com/ibtsEBs.jpeg', desc: 'Comprehensive media and marketing strategies tailored for luxury brands, ensuring unparalleled visibility and engagement.', upsells: [{id:'u5', name:'Global PR Campaign', price:5000, desc:'Extensive reach across top-tier luxury publications'}, {id:'u6', name:'Digital Brand Audit', price:1500, desc:'In-depth analysis and optimization of online presence'}] },
+      { id: 4, category: 'Adventure', title: 'Outdoor Adventure', img: 'https://i.imgur.com/HbryiZC.jpeg', desc: 'Curated outdoor experiences including hiking, mountain biking, and exploring the natural beauty of Baja California Sur.', upsells: [{id:'u7', name:'Private Guide & Gear', price:300, desc:'Experienced guide and top-tier equipment'}, {id:'u8', name:'Gourmet Picnic Lunch', price:150, desc:'Locally sourced, organic meal in a scenic spot'}] },
+      { id: 5, category: 'Talent', title: 'Brand & Talent', img: 'https://i.imgur.com/JUFqEra.jpeg', desc: 'Access to top-tier talent and brand partnerships for exclusive events and collaborations.', upsells: [{id:'u9', name:'Celebrity Appearance', price:15000, desc:'Secure a renowned personality for your event'}, {id:'u10', name:'Brand Collaboration', price:10000, desc:'Strategic partnership with luxury brands'}] },
+      { id: 6, category: 'Wellness', title: 'Luxury Spa', img: 'https://i.imgur.com/dWp5UIO.jpeg', desc: 'Holistic wellness treatments delivered in utmost privacy, utilizing cutting-edge restorative therapies.', upsells: [{id:'u11', name:'Therapeutic Massage Protocol', price:350, desc:'Deep relaxation and muscle recovery'}, {id:'u12', name:'Private Yoga & Mindfulness', price:200, desc:'Bespoke sunset sessions'}] },
+      { id: 7, category: 'Adventure', title: 'Adventure Tours', img: 'https://i.imgur.com/K8UQjbI.jpeg', desc: 'Thrilling curated experiences navigating untouched Baja terrains in premium off-road vehicles.', upsells: [{id:'u13', name:'Cinematic Video Capture', price:300, desc:'Professional drone & GoPro crew'}, {id:'u14', name:'Baja Guided Expedition', price:400, desc:'Expert local navigator and guide'}] },
+      { id: 8, category: 'Sports', title: 'Golf Access', img: 'https://i.imgur.com/8GbpdcP.jpeg', desc: 'Exclusive access to championship golf courses, private lessons with pros, and bespoke golf experiences.', upsells: [{id:'u15', name:'PGA Pro Lesson', price:500, desc:'One-on-one coaching with a PGA professional'}, {id:'u16', name:'Private Course Booking', price:1500, desc:'Secure a private tee time for your group'}] },
+      { id: 9, category: 'Real Estate', title: 'Own or Rent', img: 'https://i.imgur.com/ue6ZcLo.jpeg', desc: 'Exclusive properties for sale or rent, from luxurious beachfront villas to modern urban penthouses.', upsells: [{id:'u17', name:'Property Management', price:2500, desc:'Full-service management for your luxury property'}, {id:'u18', name:'Interior Design Consultation', price:1000, desc:'Expert advice for bespoke interiors'}] },
+      { id: 10, category: 'Family', title: 'Kids Clubs', img: 'https://i.imgur.com/8c8Gyc4.jpeg', desc: 'Premium, secure, and engaging activities providing absolute peace of mind.', upsells: [{id:'u19', name:'Bilingual VIP Nanny', price:500, desc:'Highly vetted professional childcare'}, {id:'u20', name:'Curated Adventure Day', price:350, desc:'Educational and fun local tours'}] },
+      { id: 13, category: 'Family', title: 'Kids Clubs Activities', img: 'https://i.imgur.com/GmTwmjE.jpeg', desc: 'Engaging and educational activities for children of all ages, ensuring a fun and safe experience.', upsells: [{id:'u29', name:'Private Art Classes', price:250, desc:'Personalized art instruction for creative expression'}, {id:'u30', name:'Outdoor Adventure Camp', price:400, desc:'Supervised outdoor activities and exploration'}] },
+      { id: 11, category: 'Nightlife', title: 'VIP Tables', img: 'https://i.imgur.com/wfMd9lW.jpeg', desc: 'Immediate access and the best tables at the most exclusive clubs and high-energy venues.', upsells: [{id:'u15', name:'Premium Center Table', price:1000, desc:'The most coveted seating in the venue'}, {id:'u16', name:'Dom Perignon Setup', price:800, desc:'Elite bottle presentation'}] },
+      { id: 12, category: 'Transport', title: 'Supercar Fleet', img: 'https://i.imgur.com/K8UQjbI.jpeg', desc: 'Access to the world\'s most exotic vehicles for the ultimate driving experience along the coast.', upsells: [{id:'u27', name:'Security Escort', price:600, desc:'Discreet professional security detail'}, {id:'u28', name:'Track Day Access', price:1200, desc:'Private access to racing circuit'}] }
+    ];
+
+    let bundle = [];
+    let currentService = null;
+    let selectedUpsells = new Set();
+
+    // Init Masonry Grid
+    function renderMasonry(items) {
+      const grid = document.getElementById('masonryGrid');
+      grid.innerHTML = items.map(s => `
+        <div class="pin-card" onclick="openModal(${s.id})">
+          <div class="pin-img-wrapper">
+            <img src="${s.img}" class="pin-img" alt="${s.title}" loading="lazy">
+          </div>
+          <div class="pin-overlay">
+            <div class="pin-category">${s.category}</div>
+            <h3 class="pin-title">${s.title}</h3>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function init() {
+      renderMasonry(services);
+    }
+    
+    // View Navigation
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelector(`.nav-item[data-view="${viewId}"]`).classList.add('active');
+    }
+
+    // Search Logic
+    function filterServices() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = services.filter(s => 
+        s.title.toLowerCase().includes(query) || 
+        s.category.toLowerCase().includes(query)
+      );
+      renderMasonry(filtered);
+    }
+
+    // Modal Logic
+    function openModal(id) {
+      const s = services.find(x => x.id === id);
+      currentService = s;
+      selectedUpsells.clear(); // VERY IMPORTANT: Clears state for 2nd additions
+      
+      document.getElementById('modalImg').src = s.img;
+      document.getElementById('modalCategory').textContent = s.category;
+      document.getElementById('modalTitle').textContent = s.title;
+      document.getElementById('modalDesc').textContent = s.desc;
+      
+      document.getElementById('upsellGrid').innerHTML = s.upsells.map(u => `
+        <div class="upsell-card" id="upsell-${u.id}" onclick="toggleUpsell('${u.id}')">
+          <div>
+            <div class="upsell-name">${u.name}</div>
+            <div class="upsell-desc">${u.desc}</div>
+          </div>
+          <div class="upsell-price">+$${u.price}</div>
+        </div>
+      `).join('');
+      
+      document.getElementById('modal-backdrop').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('show');
+      currentService = null;
+    }
+
+    function toggleUpsell(uId) {
+      const card = document.getElementById('upsell-' + uId);
+      if (selectedUpsells.has(uId)) {
+        selectedUpsells.delete(uId);
+        card.classList.remove('selected');
+      } else {
+        selectedUpsells.add(uId);
+        card.classList.add('selected');
+      }
+    }
+
+    // Bundle / Cart Logic (FIXED BUG)
+    function togglePackageBuilder() {
+      document.getElementById('package-builder').classList.toggle('open');
+    }
+
+    function addToBundle() {
+      if (!currentService) return;
+
+      // Deep clone to ensure objects are fully independent in the array
+      const baseItem = { 
+        id: 'pkg_' + Date.now(), // unique instance ID
+        title: currentService.title, 
+        price: 0,
+        isBase: true 
+      };
+      const itemsToAdd = [baseItem];
+
+      currentService.upsells.forEach(u => {
+        if (selectedUpsells.has(u.id)) {
+          itemsToAdd.push({ 
+            id: 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2),
+            title: u.name, 
+            price: u.price,
+            isBase: false
+          });
+        }
+      });
+      
+      bundle.push(...itemsToAdd);
+      updateBundleUI();
+      closeModal();
+      
+      // Auto-open builder to confirm addition
+      if (!document.getElementById('package-builder').classList.contains('open')) {
+        togglePackageBuilder();
+      }
+    }
+
+    function updateBundleUI() {
+      const list = document.getElementById('bundleList');
+      const badge = document.getElementById('bundleBadge');
+      
+      // Calculate distinct main items (bases) for badge
+      const baseCount = bundle.filter(i => i.isBase).length;
+      badge.textContent = baseCount;
+      if (baseCount === 0) badge.style.display = 'none';
+      else badge.style.display = 'flex';
+
+      if (bundle.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-style: italic;">No experiences added yet.</div>';
+        document.getElementById('totalAmount').textContent = '$0';
+        return;
+      }
+      
+      list.innerHTML = bundle.map((item, index) => `
+        <div class="bundle-item" style="${item.isBase ? 'border-left: 3px solid var(--gold);' : 'margin-left: 20px; border-left: 1px solid var(--surface-border);'}">
+          <div>
+            <div class="bundle-item-title">${item.title}</div>
+            <div class="bundle-item-price">${item.price > 0 ? '$' + item.price.toLocaleString() : 'Executive Inclusion'}</div>
+          </div>
+          <div class="bundle-item-remove" onclick="removeFromBundle(${index})" title="Remove">✕</div>
+        </div>
+      `).join('');
+      
+      const total = bundle.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('totalAmount').textContent = '$' + total.toLocaleString();
+    }
+
+    function removeFromBundle(index) {
+      // Remove specific index. If it was a base item, we don't auto-remove upsells here to keep things simple and user-controlled, 
+      // but the bug is eliminated because we slice by absolute index.
+      bundle.splice(index, 1);
+      updateBundleUI();
+    }
+
+    function reserveBundleEmail() {
+      if (bundle.length === 0) return alert("Your custom package is currently empty.");
+      const text = bundle.map(i => `- ${i.title} (${i.price > 0 ? '$'+i.price : 'Included'})`).join('%0A');
+      window.location.href = `mailto:angelo@caboapp.com?subject=Executive Bundle Reservation&body=I would like to request the following experiences:%0A%0A${text}%0A%0AAdditional requests:`;
+    }
+
+    function reserveBundleWhatsApp() {
+      if (bundle.length === 0) return alert("Your custom package is currently empty.");
+      
+      // Requested text format
+      const servicesText = bundle.filter(i => i.isBase).map(i => i.title).join(', '); // Get main services for text readability
+      const fullText = `Hola, me gustaría solicitar acceso anticipado a CaboApp y generar mi reserva para "${servicesText}" y si surge algo adicional te lo haré saber.`;
+      
+      const finalUrl = `https://api.whatsapp.com/send/?phone=5216241217058&text=${encodeURIComponent(fullText)}`;
+      window.open(finalUrl, '_blank');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
