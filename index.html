@@ -275,7 +275,7 @@
       overflow: hidden;
     }
 
-    /* Full-screen blurred YouTube (10% opacity + dark filter) */
+    /* Full-screen YouTube background */
     .video-background {
       position: absolute;
       inset: 0;
@@ -284,24 +284,23 @@
       overflow: hidden;
     }
 
+    /* YouTube iframe scaled to cover full screen regardless of aspect ratio */
     .video-background iframe {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 177.78vh; /* 16/9 * 100vh */
+      min-height: 56.25vw; /* 9/16 * 100vw */
+      width: 100vw;
+      height: 100vh;
       border: none;
-      object-fit: cover;
     }
 
-    /* YouTube as background - exactly 10% opacity + dark/blur */
+    /* YouTube as background - full opacity, no blur */
     #youtube-bg {
-      opacity: 0.10;
-      filter: blur(14px) brightness(0.65) contrast(1.1);
-    }
-
-    /* Jumpshare main video (prominent, autoplay) - replace URL below */
-    #jumpshare-home {
-      opacity: 0.95;
+      opacity: 1;
       filter: none;
-      z-index: 2;
     }
 
     #view-home::before {
@@ -773,22 +772,12 @@
       <div class="views-container">
         <!-- HOME VIEW - CLEAN + DUAL VIDEO -->
         <div class="view active" id="view-home">
-          <!-- Blurred YouTube full page (10% opacity + dark) -->
+          <!-- YouTube full-screen background -->
           <div class="video-background">
             <iframe id="youtube-bg" 
-                    src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=_NfXIw4gDtA&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;disablekb=1" 
+                    src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=_NfXIw4gDtA&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;disablekb=1&amp;showinfo=0&amp;iv_load_policy=3" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
-          </div>
-
-          <!-- Jumpshare video (main prominent video) - REPLACE WITH YOUR JUMPSHARE EMBED URL -->
-          <!-- If you have a direct .mp4 link, you can also use &lt;video&gt; tag instead of iframe -->
-          <div class="video-background" style="z-index: 2;">
-            <iframe id="jumpshare-home" 
-                    src="JUMPSHARE_EMBED_URL_HERE?autoplay=1&amp;mute=1&amp;loop=1&amp;controls=0" 
-                    frameborder="0" 
-                    allow="autoplay; fullscreen" 
                     allowfullscreen></iframe>
           </div>
 
@@ -832,11 +821,10 @@
             <p class="explore-subtitle">A revolutionary platform for high-net-worth individuals.</p>
           </div>
           <div class="video-container">
-            <!-- REPLACE WITH JUMPSHARE EMBED URL -->
-            <iframe src="JUMPSHARE_EMBED_URL_HERE?autoplay=1&amp;mute=1&amp;loop=1" 
+            <iframe src="https://jumpshare.com/embed/lQa9zmd6UJAuSXMNQ4JZ" 
                     frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
+                    webkitallowfullscreen mozallowfullscreen allowfullscreen
+                    style="width:100%;height:100%;"></iframe>
           </div>
         </div>
 
