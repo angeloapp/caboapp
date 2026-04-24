@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -36,15 +35,15 @@
     html, body {
       width: 100%;
       height: 100vh;
-      overflow: hidden; /* NO SCROLL AT HTML LEVEL */
+      overflow: hidden;
       background: var(--black);
       color: var(--text);
       font-family: 'Outfit', sans-serif;
       -webkit-font-smoothing: antialiased;
-      overscroll-behavior: none; /* Prevent bounce padding */
+      overscroll-behavior: none;
     }
 
-    /* GLOWING BACKGROUND EFFECT */
+    /* GLOWING BACKGROUND EFFECT (kept for non-home views) */
     body::before {
       content: '';
       position: absolute;
@@ -66,7 +65,7 @@
       z-index: 1;
     }
 
-    /* --- SIDEBAR --- */
+    /* --- SIDEBAR (hidden on home) --- */
     #sidebar {
       width: 90px;
       background: var(--glass-bg);
@@ -80,6 +79,10 @@
       z-index: 2000;
       flex-shrink: 0;
       box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    #app.home-active #sidebar {
+      display: none !important;
     }
 
     .nav-item {
@@ -127,6 +130,7 @@
       background: radial-gradient(circle at 80% 80%, rgba(20, 18, 15, 1) 0%, var(--black) 100%);
     }
 
+    /* Top bar hidden on home */
     .top-bar {
       height: 90px;
       display: flex;
@@ -136,8 +140,12 @@
       background: linear-gradient(to bottom, rgba(5,5,5,1) 0%, rgba(5,5,5,0) 100%);
       flex-shrink: 0;
       z-index: 1000;
-      position: absolute; /* Floating bar */
+      position: absolute;
       top: 0; left: 0; right: 0;
+    }
+
+    #app.home-active .top-bar {
+      display: none !important;
     }
 
     .logo {
@@ -160,67 +168,64 @@
       opacity: 0;
     }
 
-    @keyframes logo-reveal {
-      0% {
-        clip-path: inset(0 100% 0 0);
-        opacity: 0;
-      }
-      100% {
-        clip-path: inset(0 0% 0 0);
-        opacity: 1;
-      }
-    }
-
-    @keyframes logo-glow {
-      0% { filter: drop-shadow(0 0 5px var(--gold-bright)) drop-shadow(0 0 15px rgba(212,175,55,0.5)); }
-      100% { filter: drop-shadow(0 0 10px var(--gold-bright)) drop-shadow(0 0 25px rgba(212,175,55,0.8)); }
-    }
-
     @keyframes logo-fade-in {
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
 
-    @keyframes logo-slide-in {
-      0% { transform: translateY(-50px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    }
-
+    /* === ENHANCED BUNDLE BUTTON (more attractive luxury card/pill) === */
     .btn-bundle-toggle {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--gold);
-      color: var(--gold-bright);
-      padding: 12px 28px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      color: var(--black);
+      padding: 14px 32px;
       border-radius: 50px;
-      cursor: pointer;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: 0.8rem;
+      font-weight: 700;
+      font-size: 0.9rem;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
+      border: none;
+      cursor: pointer;
       transition: all 0.4s var(--ease-out);
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 8px 25px rgba(212,175,55,0.15);
+      box-shadow: 0 10px 30px rgba(212,175,55,0.4),
+                  inset 0 1px 0 rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-bundle-toggle::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transform: translateX(-150%);
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      100% { transform: translateX(300%); }
     }
 
     .btn-bundle-toggle:hover {
-      background: var(--gold);
-      color: var(--black);
-      transform: scale(1.05);
-      box-shadow: 0 15px 30px rgba(212,175,55,0.3);
+      transform: translateY(-4px) scale(1.06);
+      box-shadow: 0 20px 40px rgba(212,175,55,0.5),
+                  inset 0 1px 0 rgba(255,255,255,0.5);
     }
+
     .bundle-badge {
-      background: var(--text);
-      color: var(--black);
+      background: var(--black);
+      color: var(--gold-bright);
       border-radius: 50%;
-      width: 22px; height: 22px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 900;
+      width: 22px; 
+      height: 22px;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-size: 0.75rem; 
+      font-weight: 900;
+      box-shadow: 0 0 10px var(--gold);
     }
 
     /* --- VIEWS CONTAINER --- */
@@ -239,9 +244,9 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto; /* Internal scrolling only */
+      overflow-y: auto;
       overflow-x: hidden;
-      padding-top: 100px; /* Space for top-bar */
+      padding-top: 100px;
       padding-bottom: 50px;
       transform: translateY(20px);
     }
@@ -257,54 +262,93 @@
       z-index: 100;
     }
 
-    /* --- HOME VIEW --- */
-      #view-home {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        background: url(\'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000\') center/cover no-repeat;
-        position: relative;
-        padding: 0;
-        min-height: 100vh;
-      }
+    /* --- HOME VIEW (clean + dual video) --- */
+    #view-home {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 !important;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Full-screen blurred YouTube (10% opacity + dark filter) */
+    .video-background {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .video-background iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      object-fit: cover;
+    }
+
+    /* YouTube as background - exactly 10% opacity + dark/blur */
+    #youtube-bg {
+      opacity: 0.10;
+      filter: blur(14px) brightness(0.65) contrast(1.1);
+    }
+
+    /* Jumpshare main video (prominent, autoplay) - replace URL below */
+    #jumpshare-home {
+      opacity: 0.95;
+      filter: none;
+      z-index: 2;
+    }
 
     #view-home::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.75) 100%);
+      z-index: 3;
+      pointer-events: none;
     }
 
     .hero-content {
       position: relative;
-      z-index: 2;
+      z-index: 4;
       max-width: 900px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 30px;
+      padding: 0 20px;
     }
 
     .hero-title {
       margin-bottom: 0;
     }
 
-    .hero-title span {
-      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
     .hero-subtitle {
       font-size: 1.25rem;
       color: var(--text-dim);
-      margin: 0 auto 45px;
+      margin: 0 auto 30px;
       font-weight: 300;
       line-height: 1.6;
+      max-width: 700px;
+    }
+
+    /* Hero Jumpshare container (if you prefer a framed video above the button) */
+    .hero-video-container {
+      width: 100%;
+      max-width: 680px;
+      aspect-ratio: 16/9;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(212,175,55,0.25);
+      border: 1px solid rgba(212,175,55,0.3);
+      z-index: 4;
+      margin-bottom: 20px;
     }
 
     .btn-gold {
@@ -321,6 +365,7 @@
       font-size: 0.95rem;
       font-family: 'Outfit', sans-serif;
       box-shadow: 0 10px 30px rgba(212,175,55,0.25);
+      z-index: 4;
     }
 
     .btn-gold:hover {
@@ -403,7 +448,6 @@
       color: var(--gold-bright);
     }
 
-    /* Masonry Layout Container (CSS Columns approach) */
     .masonry-grid {
       columns: 4 280px;
       column-gap: 25px;
@@ -436,7 +480,6 @@
       overflow: hidden;
     }
     
-    /* Variable height simulation for Pinterest feel */
     .pin-card:nth-child(even) .pin-img-wrapper { aspect-ratio: 3/4; }
     .pin-card:nth-child(odd) .pin-img-wrapper { aspect-ratio: 4/5; }
     .pin-card:nth-child(3n) .pin-img-wrapper { aspect-ratio: 1/1; }
@@ -495,13 +538,14 @@
       opacity: 1;
     }
 
-    /* --- APP VIEW --- */
+    /* --- APP VIEW (Jumpshare video) --- */
     #view-app {
       padding: 100px 50px 50px;
       align-items: center;
     }
     .video-container {
-      width: 100%; max-width: 1000px;
+      width: 100%; 
+      max-width: 1000px;
       aspect-ratio: 21/9;
       border-radius: var(--radius-lg);
       overflow: hidden;
@@ -646,14 +690,13 @@
       .masonry-grid { columns: 3 250px; }
       .contact-wrapper { flex-direction: column; gap: 40px; }
       .contact-info { flex: none; display: flex; justify-content: space-between; flex-wrap: wrap; }
-      .top-bar { padding: 0 25px; } /* Fix right cutoff */
+      .top-bar { padding: 0 25px; }
     }
     @media (max-width: 768px) {
       #sidebar { width: 70px; }
       .nav-item { width: 50px; height: 50px; }
       .nav-icon { font-size: 1.2rem; }
       .nav-label { font-size: 0.45rem; }
-      #main-content { padding-left: 0; }
       .masonry-grid { columns: 2 200px; }
       .hero-title { font-size: 4rem; }
       .modal-box { flex-direction: column; max-height: 95vh; }
@@ -674,33 +717,26 @@
       #package-builder { width: 100vw; right: -100vw; }
 
       #view-home {
-        padding-top: 0 !important; /* Remove padding from .view completely */
-        padding-bottom: 0 !important;
-        height: 100vh; /* Full viewport height */
-        justify-content: center; /* Center vertically */
-        align-items: center; /* Center horizontally */
-        display: flex; /* Make it a flex container */
-        flex-direction: column; /* Stack content vertically */
-        overflow: hidden; /* Ensure no scroll */
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
 
       .hero-content {
-        padding: 20px; /* Adjust padding for smaller screens */
-        width: 100%; /* Ensure it takes full width */
-        max-width: 100%; /* Override max-width for mobile */
-        display: flex; /* Make it a flex container */
-        flex-direction: column; /* Stack content vertically */
-        justify-content: center; /* Center vertically */
-        align-items: center; /* Center horizontally */
-        gap: 20px; /* Space between logo, text, and button */
+        padding: 20px;
+        width: 100%;
+        max-width: 100%;
       }
     }
   </style>
 </head>
 <body>
 
-  <div id="app">
-    <!-- SIDEBAR -->
+  <div id="app" class="home-active">
+    <!-- SIDEBAR (hidden on home) -->
     <nav id="sidebar">
       <div class="nav-item active" onclick="showView('home')" data-view="home">
         <span class="nav-icon">✧</span>
@@ -729,22 +765,49 @@
       <div class="top-bar">
         <div class="logo"><img src="https://i.imgur.com/olqSAoh.png" alt="CaboApp Logo" class="logo-img"></div>
         <button class="btn-bundle-toggle" onclick="togglePackageBuilder()">
-          <span>Bundle</span>
+          <span>✦ Bundle</span>
           <div class="bundle-badge" id="bundleBadge">0</div>
         </button>
       </div>
 
       <div class="views-container">
-        <!-- HOME VIEW -->
+        <!-- HOME VIEW - CLEAN + DUAL VIDEO -->
         <div class="view active" id="view-home">
+          <!-- Blurred YouTube full page (10% opacity + dark) -->
+          <div class="video-background">
+            <iframe id="youtube-bg" 
+                    src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=_NfXIw4gDtA&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;disablekb=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
+          </div>
+
+          <!-- Jumpshare video (main prominent video) - REPLACE WITH YOUR JUMPSHARE EMBED URL -->
+          <!-- If you have a direct .mp4 link, you can also use &lt;video&gt; tag instead of iframe -->
+          <div class="video-background" style="z-index: 2;">
+            <iframe id="jumpshare-home" 
+                    src="JUMPSHARE_EMBED_URL_HERE?autoplay=1&amp;mute=1&amp;loop=1&amp;controls=0" 
+                    frameborder="0" 
+                    allow="autoplay; fullscreen" 
+                    allowfullscreen></iframe>
+          </div>
+
           <div class="hero-content">
-           <h1 class="hero-title"><img src="https://i.imgur.com/olqSAoh.png" alt="CaboApp Logo" class="hero-logo"></h1>
+            <h1 class="hero-title"><img src="https://i.imgur.com/olqSAoh.png" alt="CaboApp Logo" class="hero-logo"></h1>
             <p class="hero-subtitle">The world's premier luxury ecosystem. Curated experiences, elite access, and bespoke services at your fingertips.</p>
+            
+            <!-- Optional framed Jumpshare if you prefer it centered above button (uncomment if needed) -->
+            <!-- 
+            <div class="hero-video-container">
+              <iframe src="JUMPSHARE_EMBED_URL_HERE?autoplay=1&amp;mute=1&amp;loop=1" frameborder="0" allowfullscreen></iframe>
+            </div>
+            -->
+
             <button class="btn-gold" onclick="showView('explore')">Curate Your Experience</button>
           </div>
         </div>
 
-        <!-- EXPLORE VIEW (PINTEREST STYLE) -->
+        <!-- EXPLORE VIEW -->
         <div class="view" id="view-explore">
           <div class="explore-header-box">
             <div>
@@ -762,14 +825,18 @@
           </div>
         </div>
 
-        <!-- APP VIEW -->
+        <!-- APP VIEW - Jumpshare instead of YouTube -->
         <div class="view" id="view-app">
           <div>
             <h2 class="explore-title">The Digital Key</h2>
             <p class="explore-subtitle">A revolutionary platform for high-net-worth individuals.</p>
           </div>
           <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&mute=1&loop=1&playlist=_NfXIw4gDtA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <!-- REPLACE WITH JUMPSHARE EMBED URL -->
+            <iframe src="JUMPSHARE_EMBED_URL_HERE?autoplay=1&amp;mute=1&amp;loop=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
           </div>
         </div>
 
@@ -808,7 +875,6 @@
               </div>
             </div>
 
-            <!-- WEB3FORMS INTEGRATION -->
             <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
               <input type="hidden" name="access_key" value="edcb2865-5192-45fa-972c-3ea7af5e838c">
               <input type="hidden" name="subject" value="New Executive Inquiry - CaboApp">
@@ -909,7 +975,6 @@
     let currentService = null;
     let selectedUpsells = new Set();
 
-    // Init Masonry Grid
     function renderMasonry(items) {
       const grid = document.getElementById('masonryGrid');
       grid.innerHTML = items.map(s => `
@@ -927,18 +992,28 @@
 
     function init() {
       renderMasonry(services);
+      // Ensure home is active on load
+      showView('home');
     }
     
-    // View Navigation
+    // View Navigation + hide sidebar/top-bar on Home
     function showView(viewId) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
       
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.querySelector(`.nav-item[data-view="${viewId}"]`).classList.add('active');
+      const activeNav = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+      if (activeNav) activeNav.classList.add('active');
+      
+      const app = document.getElementById('app');
+      
+      if (viewId === 'home') {
+        app.classList.add('home-active');
+      } else {
+        app.classList.remove('home-active');
+      }
     }
 
-    // Search Logic
     function filterServices() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const filtered = services.filter(s => 
@@ -948,11 +1023,10 @@
       renderMasonry(filtered);
     }
 
-    // Modal Logic
     function openModal(id) {
       const s = services.find(x => x.id === id);
       currentService = s;
-      selectedUpsells.clear(); // VERY IMPORTANT: Clears state for 2nd additions
+      selectedUpsells.clear();
       
       document.getElementById('modalImg').src = s.img;
       document.getElementById('modalCategory').textContent = s.category;
@@ -988,7 +1062,6 @@
       }
     }
 
-    // Bundle / Cart Logic (FIXED BUG)
     function togglePackageBuilder() {
       document.getElementById('package-builder').classList.toggle('open');
     }
@@ -996,9 +1069,8 @@
     function addToBundle() {
       if (!currentService) return;
 
-      // Deep clone to ensure objects are fully independent in the array
       const baseItem = { 
-        id: 'pkg_' + Date.now(), // unique instance ID
+        id: 'pkg_' + Date.now(),
         title: currentService.title, 
         price: 0,
         isBase: true 
@@ -1020,7 +1092,6 @@
       updateBundleUI();
       closeModal();
       
-      // Auto-open builder to confirm addition
       if (!document.getElementById('package-builder').classList.contains('open')) {
         togglePackageBuilder();
       }
@@ -1030,11 +1101,9 @@
       const list = document.getElementById('bundleList');
       const badge = document.getElementById('bundleBadge');
       
-      // Calculate distinct main items (bases) for badge
       const baseCount = bundle.filter(i => i.isBase).length;
       badge.textContent = baseCount;
-      if (baseCount === 0) badge.style.display = 'none';
-      else badge.style.display = 'flex';
+      badge.style.display = baseCount === 0 ? 'none' : 'flex';
 
       if (bundle.length === 0) {
         list.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-style: italic;">No experiences added yet.</div>';
@@ -1057,8 +1126,6 @@
     }
 
     function removeFromBundle(index) {
-      // Remove specific index. If it was a base item, we don't auto-remove upsells here to keep things simple and user-controlled, 
-      // but the bug is eliminated because we slice by absolute index.
       bundle.splice(index, 1);
       updateBundleUI();
     }
@@ -1071,11 +1138,8 @@
 
     function reserveBundleWhatsApp() {
       if (bundle.length === 0) return alert("Your custom package is currently empty.");
-      
-      // Requested text format
-      const servicesText = bundle.filter(i => i.isBase).map(i => i.title).join(', '); // Get main services for text readability
+      const servicesText = bundle.filter(i => i.isBase).map(i => i.title).join(', ');
       const fullText = `Hola, me gustaría solicitar acceso anticipado a CaboApp y generar mi reserva para "${servicesText}" y si surge algo adicional te lo haré saber.`;
-      
       const finalUrl = `https://api.whatsapp.com/send/?phone=5216241217058&text=${encodeURIComponent(fullText)}`;
       window.open(finalUrl, '_blank');
     }
