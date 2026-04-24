@@ -285,22 +285,35 @@
     }
 
     /* YouTube iframe scaled to cover full screen regardless of aspect ratio */
-    .video-background iframe {
+    .video-background > iframe {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      min-width: 177.78vh; /* 16/9 * 100vh */
-      min-height: 56.25vw; /* 9/16 * 100vw */
+      min-width: 177.78vh;
+      min-height: 56.25vw;
       width: 100vw;
       height: 100vh;
       border: none;
     }
 
-    /* YouTube as background - full opacity, no blur */
+    /* YouTube IFrame API - the API injects an iframe inside #youtube-bg div */
     #youtube-bg {
-      opacity: 1;
-      filter: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 177.78vh;
+      min-height: 56.25vw;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+    }
+
+    #youtube-bg iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
     }
 
     #view-home::before {
@@ -545,14 +558,15 @@
     .video-container {
       width: 100%; 
       max-width: 1000px;
-      aspect-ratio: 21/9;
+      aspect-ratio: 16/9;
       border-radius: var(--radius-lg);
       overflow: hidden;
       border: 1px solid var(--surface-border);
       box-shadow: 0 30px 60px rgba(0,0,0,0.8);
       margin-top: 40px;
+      position: relative;
     }
-    .video-container iframe { width: 100%; height: 100%; }
+    .video-container iframe { width: 100%; height: 100%; position: absolute; inset: 0; }
 
     /* --- ABOUT VIEW --- */
     #view-about {
@@ -772,13 +786,9 @@
       <div class="views-container">
         <!-- HOME VIEW - CLEAN + DUAL VIDEO -->
         <div class="view active" id="view-home">
-          <!-- YouTube full-screen background -->
+          <!-- YouTube full-screen background via IFrame API -->
           <div class="video-background">
-            <iframe id="youtube-bg" 
-                    src="https://www.youtube.com/embed/_NfXIw4gDtA?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=_NfXIw4gDtA&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;disablekb=1&amp;showinfo=0&amp;iv_load_policy=3" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
+            <div id="youtube-bg"></div>
           </div>
 
           <div class="hero-content">
@@ -1133,6 +1143,49 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
+
+    // ── YouTube IFrame API ──────────────────────────────────────────
+    // Load the API script dynamically
+    var ytApiScript = document.createElement('script');
+    ytApiScript.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(ytApiScript);
+
+    var ytPlayer;
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('youtube-bg', {
+        videoId: '_NfXIw4gDtA',
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          loop: 1,
+          playlist: '_NfXIw4gDtA',
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          disablekb: 1,
+          showinfo: 0,
+          iv_load_policy: 3,
+          playsinline: 1
+        },
+        events: {
+          onReady: function(e) {
+            e.target.mute();
+            e.target.playVideo();
+          },
+          onStateChange: function(e) {
+            // Keep looping
+            if (e.data === YT.PlayerState.ENDED) {
+              e.target.playVideo();
+            }
+            // If paused for any reason, resume
+            if (e.data === YT.PlayerState.PAUSED) {
+              setTimeout(function(){ e.target.playVideo(); }, 300);
+            }
+          }
+        }
+      });
+    };
+    // ────────────────────────────────────────────────────────────────
   </script>
 </body>
 </html>
