@@ -940,10 +940,11 @@
         Submit Inquiry
       </button>
     </form>
-  </div>
-</div>
-</div>
-</main>
+  </div><!-- end contact-wrapper -->
+</div><!-- end view-contact -->
+
+      </div><!-- end views-container -->
+    </main><!-- end main-content -->
     <!-- PACKAGE BUILDER / BUNDLE SIDEBAR -->
     <aside id="package-builder">
       <div class="builder-header">
@@ -1010,7 +1011,6 @@
     { id: 11, category: 'Nightlife', title: 'VIP Tables', img: 'https://i.imgur.com/wfMd9lW.jpeg', desc: 'Immediate access and the best tables at the most exclusive clubs and high-energy venues.', upsells: [{id:'u15', name:'Premium Center Table', price:'1000 USD', desc:'The most coveted seating in the venue'}, {id:'u16', name:'Dom Perignon Setup', price:'800 USD', desc:'Elite bottle presentation'}] },
     { id: 12, category: 'Transport', title: 'Supercar Fleet', img: 'https://i.imgur.com/K8UQjbI.jpeg', desc: 'Access to the world\'s most exotic vehicles for the ultimate driving experience along the coast.', upsells: [{id:'u27', name:'Security Escort', price:'600 USD', desc:'Discreet professional security detail'}, {id:'u28', name:'Track Day Access', price:'1200 USD', desc:'Private access to racing circuit'}] }
   ];
-</script>
 
     let bundle = [];
     let currentService = null;
@@ -1120,10 +1120,13 @@
 
       currentService.upsells.forEach(u => {
         if (selectedUpsells.has(u.id)) {
+          // Parse numeric value from price string like '800 USD'
+          const numericPrice = parseInt(String(u.price).replace(/[^0-9]/g, '')) || 0;
           itemsToAdd.push({ 
             id: 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2),
             title: u.name, 
-            price: u.price,
+            price: numericPrice,
+            priceLabel: u.price,
             isBase: false
           });
         }
@@ -1156,7 +1159,7 @@
         <div class="bundle-item" style="${item.isBase ? 'border-left: 3px solid var(--gold);' : 'margin-left: 20px; border-left: 1px solid var(--surface-border);'}">
           <div>
             <div class="bundle-item-title">${item.title}</div>
-            <div class="bundle-item-price">${item.price > 0 ? '$' + item.price.toLocaleString() : 'Executive Inclusion'}</div>
+            <div class="bundle-item-price">${item.price > 0 ? (item.priceLabel ? item.priceLabel : '$' + item.price.toLocaleString()) : 'Executive Inclusion'}</div>
           </div>
           <div class="bundle-item-remove" onclick="removeFromBundle(${index})" title="Remove">✕</div>
         </div>
@@ -1185,14 +1188,8 @@
       window.open(finalUrl, '_blank');
     }
 
-    document.addEventListener('DOMContentLoaded', init);
-
     // ── YouTube IFrame API ──────────────────────────────────────────
-    // Load the API script dynamically
-    var ytApiScript = document.createElement('script');
-    ytApiScript.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(ytApiScript);
-
+    // Define callback BEFORE loading the script so it's ready when API fires
     var ytPlayer;
     window.onYouTubeIframeAPIReady = function() {
       ytPlayer = new YT.Player('youtube-bg', {
@@ -1216,19 +1213,23 @@
             e.target.playVideo();
           },
           onStateChange: function(e) {
-            // Keep looping
-            if (e.data === YT.PlayerState.ENDED) {
-              e.target.playVideo();
-            }
-            // If paused for any reason, resume
-            if (e.data === YT.PlayerState.PAUSED) {
-              setTimeout(function(){ e.target.playVideo(); }, 300);
-            }
+            if (e.data === YT.PlayerState.ENDED) { e.target.playVideo(); }
+            if (e.data === YT.PlayerState.PAUSED) { setTimeout(function(){ e.target.playVideo(); }, 300); }
           }
         }
       });
     };
+
+    // Load the YouTube IFrame API script
+    (function() {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
     // ────────────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
